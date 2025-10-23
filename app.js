@@ -22,7 +22,7 @@ const app = express();
 // MIDDLEWARE
 // =========================================================
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: process.env.CLIENT_URL || true,
   credentials: true
 }));
 
