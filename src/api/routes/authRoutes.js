@@ -8,6 +8,31 @@ const router = express.Router();
 // LOGIN COM GOOGLE
 // ==========================================================
 
+function resolveClientUrl(req, pathname = '/') {
+  const configured = process.env.CLIENT_URL?.trim();
+
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const proto = forwardedProto ? forwardedProto.split(',')[0] : req.protocol;
+  const forwardedHost = req.headers['x-forwarded-host'];
+  const host = forwardedHost || req.get('host');
+  const fallback = `${proto}://${host}`;
+
+  const baseCandidate = configured && configured.length > 0 ? configured : fallback;
+
+  try {
+    const url = new URL(baseCandidate);
+    url.pathname = pathname;
+    url.search = '';
+    url.hash = '';
+    return url.toString();
+  } catch (_err) {
+    const url = new URL(pathname, fallback);
+    url.search = '';
+    url.hash = '';
+    return url.toString();
+  }
+}
+
 // Inicia o processo de login com Google
 router.get('/google', passport.authenticate('google', {
   scope: ['profile', 'email']
@@ -22,7 +47,7 @@ router.get(
   }),
   (req, res) => {
     // 🔹 Redireciona corretamente para o index dentro de /paginas
-    res.redirect(`${process.env.CLIENT_URL}/paginas/index.html`);
+    res.redirect(resolveClientUrl(req, '/paginas/index.html'));
   }
 );
 
@@ -31,10 +56,21 @@ router.get(
 // ==========================================================
 router.get('/login/success', (req, res) => {
   if (req.user) {
+    const nome = req.user.nome || req.user.displayName || '';
+    const email = req.user.email || req.user.emails?.[0]?.value || '';
+    const avatar = req.user.avatar_url || req.user.photos?.[0]?.value || null;
+
     res.status(200).json({
       success: true,
       message: 'Autenticado com sucesso!',
-      user: req.user
+      user: {
+        id: req.user.id,
+        nome,
+        displayName: nome,
+        email,
+        avatar_url: avatar,
+        avatarUrl: avatar
+      }
     });
   } else {
     res.status(401).json({
@@ -48,10 +84,14 @@ router.get('/login/success', (req, res) => {
 // FALHA NO LOGIN
 // ==========================================================
 router.get('/login/failed', (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: 'Falha na autenticação.'
-  });
+  const redirectUrl = resolveClientUrl(req, '/paginas/login.html?erro=oauth');
+  if (req.accepts('json')) {
+    return res.status(401).json({
+      success: false,
+      message: 'Falha na autenticação.'
+    });
+  }
+  res.redirect(redirectUrl);
 });
 
 // ==========================================================
@@ -60,7 +100,18 @@ router.get('/login/failed', (req, res) => {
 router.get('/logout', (req, res, next) => {
   req.logout(err => {
     if (err) return next(err);
-    res.redirect(process.env.CLIENT_URL);
+
+    const finish = () => {
+      const redirectUrl = resolveClientUrl(req, '/paginas/login.html');
+      res.clearCookie('connect.sid', { path: '/' });
+      res.redirect(redirectUrl);
+    };
+
+    if (req.session) {
+      req.session.destroy(() => finish());
+    } else {
+      finish();
+    }
   });
 });
 

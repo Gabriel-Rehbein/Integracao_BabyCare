@@ -73,6 +73,25 @@ a{color:inherit}
 .bc-icon-btn img{width:18px;height:18px}
 .bc-icon-btn:active{transform:translateY(1px)}
 
+/* ------------------ Chip do usuário logado ------------------ */
+.bc-user-chip{
+  display:flex;align-items:center;gap:12px;margin:18px auto 0 auto;padding:10px 14px;
+  background:rgba(255,255,255,.65);border-radius:var(--radius-lg);
+  border:1.5px solid #00000025;box-shadow:var(--shadow);
+  width:min(100%, var(--container));
+}
+.bc-user-chip__avatar{
+  width:42px;height:42px;border-radius:50%;border:2px solid #00000030;object-fit:cover;background:#fff;
+}
+.bc-user-chip__meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bc-user-chip__name{margin:0;font-size:.95rem;font-weight:700}
+.bc-user-chip__email{margin:0;font-size:.8rem;color:var(--muted);word-break:break-word}
+.bc-user-chip__logout{
+  margin-left:auto;border:none;border-radius:999px;padding:8px 16px;font-weight:700;font-size:.85rem;
+  background:linear-gradient(135deg, #ff8b5d, #ff5f6d);color:#fff;cursor:pointer;box-shadow:var(--shadow);
+}
+.bc-user-chip__logout:active{transform:translateY(1px)}
+
 /* ------------------ GRID de atalhos ------------------ */
 .bc-shortcuts{margin-top:18px}
 .bc-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:18px}

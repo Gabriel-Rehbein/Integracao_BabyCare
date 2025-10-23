@@ -34,6 +34,15 @@
   </header>
 
   <main id="conteudo" class="bc-main">
+    <section class="bc-user-chip" data-auth="chip" hidden aria-label="Sessão do usuário">
+      <img class="bc-user-chip__avatar" data-auth="avatar" alt="Avatar do usuário" hidden>
+      <div class="bc-user-chip__meta">
+        <strong class="bc-user-chip__name" data-auth="name">Entrando…</strong>
+        <small class="bc-user-chip__email" data-auth="email"></small>
+      </div>
+      <button class="bc-user-chip__logout" type="button" data-action="logout">Sair</button>
+    </section>
+
     <!-- GRID DE ATALHOS (2 colunas no mobile como no wireframe) -->
     <section class="bc-shortcuts" aria-label="Atalhos principais">
       <ul class="bc-grid">
@@ -117,6 +126,7 @@
   <!-- Botão flutuante global (canto inferior direito) -->
 
   <!-- JS externo (enviar depois): js/script.js -->
+  <script src="js/auth-guard.js" defer></script>
   <script src="js/script.js" defer></script>
   <script src="index.js" defer></script>
 </body>

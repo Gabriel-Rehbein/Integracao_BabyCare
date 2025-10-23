@@ -1,5 +1,5 @@
-// Ajuste se seu back-end não for localhost:3000
-const API_BASE = 'http://localhost:3000';
+const API_BASE = window.location.origin;
+const HOME_PAGE = '/paginas/index.html';
 
 const $ = s => document.querySelector(s);
 const guest   = $('#guest');
@@ -19,19 +19,37 @@ async function checkSession(){
     const res = await fetch(`${API_BASE}/auth/login/success`, { credentials: 'include' });
     const data = await res.json();
 
-    if (res.ok && data.success){
+    if (res.ok && data.success && data.user){
+      // Se já houver sessão ativa, encaminha direto para a home
+      if (window.location.pathname.endsWith('login.html')){
+        window.location.replace(HOME_PAGE);
+        return;
+      }
       // Usuário logado
-      displayNameEl.textContent = data.user.displayName || 'Usuário';
-      const email = (data.user.emails?.[0]?.value) || (data.user.email) || '';
+      const nome = data.user.displayName || data.user.nome || data.user.name || 'Usuário';
+      displayNameEl.textContent = nome;
+
+      const email = data.user.email || data.user.emails?.[0]?.value || '';
       emailEl.textContent = email;
 
-      const photo = (data.user.photos?.[0]?.value) || '';
-      if (photo) avatarEl.src = photo; else avatarEl.style.display = 'none';
+      const photo = data.user.avatar_url || data.user.avatarUrl || data.user.photos?.[0]?.value || '';
+      if (photo){
+        avatarEl.src = photo;
+        avatarEl.style.display = '';
+      } else {
+        avatarEl.removeAttribute('src');
+        avatarEl.style.display = 'none';
+      }
 
       hide(guest);
       show(authed);
     } else {
       // Não logado
+      displayNameEl.textContent = 'Usuário';
+      emailEl.textContent = '';
+      avatarEl.removeAttribute('src');
+      avatarEl.style.display = 'none';
+
       hide(authed);
       show(guest);
     }
